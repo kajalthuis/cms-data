@@ -9,6 +9,7 @@ import streamlit as st
 from PIL import Image
 import CDC_funcs
 import CRC_funcs
+import PVD_funcs
 
 st.markdown('<style>body{background-color: #D1D1D1;}</style>',unsafe_allow_html=True)
 
@@ -60,12 +61,11 @@ def main():
                     tmp_download_link = CDC_funcs.download_link_csv(frame, 
                                                                     f'{new_name}.csv', 
                                                                     'Click here to download CSV file!')
-                    st.markdown(tmp_download_link, unsafe_allow_html=True)
                 elif radio2 == 'Excel file':
                     tmp_download_link = CDC_funcs.download_link_excel(frame, 
                                                                       f'{new_name}.xlsx', 
                                                                       'Click here to download excel file!')
-                    st.markdown(tmp_download_link, unsafe_allow_html=True)                    
+                st.markdown(tmp_download_link, unsafe_allow_html=True)                    
                 
                 st.success('Done!')
                 CDC_funcs.show_preview(frame)
@@ -191,8 +191,44 @@ def main():
     #####PVD#####
     elif technique == 'PVD':
         header2.title("""PVD data import""")
+        col1, col2 = st.beta_columns(2)
+        radio1 = col1.radio('Save as?', ['Excel file','CSV file'])
         
-        
+        uploads = st.sidebar.file_uploader('Upload log files', 
+                                           accept_multiple_files=True, 
+                                           type='ext')        
+        if len(uploads) == 1:
+            st.write(f' **{len(uploads)}** file imported')
+        else:
+            st.write(f' **{len(uploads)}** files imported')
+            
+        if len(uploads) > 0:
+            list_ = []
+            for file_ in uploads:
+                headers = [0,1]
+                df = pd.read_csv(file_, skiprows=headers, index_col=False, header=None)
+                #####
+                list_.append(df)
+
+            col1, col2 = st.beta_columns([2,4])
+            start_button = col1.button('Process .ext files', key='1')
+
+            if start_button:
+                with st.spinner(text='In progress...'):
+                    frame = PVD_funcs.convert(list_)    
+
+                if radio1 == 'CSV file':
+                    tmp_download_link = CDC_funcs.download_link_csv(frame, 
+                                                                    'PVD_data_processed.csv', 
+                                                                    'Click here to download CSV file!')
+                elif radio1 == 'Excel file':
+                    tmp_download_link = CDC_funcs.download_link_excel(frame, 
+                                                                      'PVD_data_processed.xlsx', 
+                                                                      'Click here to download excel file!')
+                st.markdown(tmp_download_link, unsafe_allow_html=True)                  
+                st.success('Done!')
+                PVD_funcs.show_preview(frame)                    
+            
 if __name__ == "__main__":
     main()
     
