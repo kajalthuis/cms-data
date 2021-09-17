@@ -11,7 +11,7 @@ import plotly.express as px
 import streamlit as st
 
     
-def convert(pos_, acc_, log_, log_present, acc_present):
+def convert(pos_, acc_, log_, log_present, acc_present, select_headers):
     ## log ## 
     
     if log_present:
@@ -143,6 +143,10 @@ def convert(pos_, acc_, log_, log_present, acc_present):
     output = output.sort_values(by=['Date', 'Time', 'Impact #'])
     output = output.set_index('Impact #')
     
+    for header in list(output):
+        if header not in select_headers:
+            output = output.drop(header, axis=1)
+    
     pos = pos.sort_values(by=['#date [YYYYMMDD]', 'time [HHMMSS]'])
     
     ## acc ##
@@ -166,6 +170,10 @@ def convert(pos_, acc_, log_, log_present, acc_present):
 
 def show_preview(output):
     st.write('**Preview:**')
+    for col in ['X', 'Y', 'Pass']:
+        if col not in list(output):
+            st.warning('Please add the X, Y and Pass columns')
+            return
     fig = px.scatter(data_frame = output,
                      x=output['X'],
                      y=output['Y'],
