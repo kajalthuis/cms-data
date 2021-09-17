@@ -207,7 +207,6 @@ def main():
             st.write(f' **{len(uploads)}** files imported')
             
         if len(uploads) > 0:
-            select1 = st.sidebar.multiselect('test', ['ja', 'nee','weetnie','depth', 'taota','pullbahc', 'force', 'vertical'], ['ja', 'nee','weetnie','depth', 'taota','pullbahc', 'force', 'vertical'])
             list_ = []
              
             for file_ in uploads:
