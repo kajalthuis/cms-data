@@ -13,7 +13,7 @@ import PVD_funcs
 
 #st.markdown('<style>body{background-color: #D1D1D1;}</style>',unsafe_allow_html=True)
 
-header1, header2 = st.columns([1,5])
+header1, header2 = st.beta_columns([1,5])
 image1 = Image.open('BOS_Cofra_Logo_RGB.png')
 header1.image(image1, width=100)
 
@@ -24,7 +24,7 @@ def main():
     #####CDC#####
     if technique == 'CDC':
         header2.title("""CDC data import""")
-        col1, col2 = st.columns(2)
+        col1, col2 = st.beta_columns(2)
         radio1 = col1.radio('Remove points with less than 3 blows?', ['yes','no'])
         radio2 = col2.radio('Save as?', ['Excel file','CSV file'])        
         
@@ -50,7 +50,7 @@ def main():
             new_name=new_name.split('_')
             new_name=new_name[0]
             
-            col1, col2 = st.columns([2,4])
+            col1, col2 = st.beta_columns([2,4])
             start_button = col1.button('Process .log files', key='1')
             
             if start_button:
@@ -73,7 +73,7 @@ def main():
     #####CRC#####
     elif technique == 'CRC':
         header2.title("""CRC data import""")
-        col1, col2 = st.columns(2)
+        col1, col2 = st.beta_columns(2)
         radio1 = col1.radio('Save as?', ['Excel file','CSV file'])
         
         uploads_ext = st.sidebar.file_uploader('Upload pos files', 
@@ -195,7 +195,7 @@ def main():
     #####PVD#####
     elif technique == 'PVD':
         header2.title("""PVD data import""")
-        col1, col2 = st.columns(2)
+        col1, col2 = st.beta_columns(2)
         radio1 = col1.radio('Save as?', ['Excel file','CSV file'])
         
         uploads = st.sidebar.file_uploader('Upload log files', 
@@ -236,7 +236,7 @@ def main():
             
             #st.write(header_list)   
             
-            col1, col2 = st.columns([2,4])
+            col1, col2 = st.beta_columns([2,4])
             start_button = col1.button('Process .ext files', key='1')
 
             if start_button:
