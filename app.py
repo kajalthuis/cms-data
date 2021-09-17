@@ -11,9 +11,9 @@ import CDC_funcs
 import CRC_funcs
 import PVD_funcs
 
-st.markdown('<style>body{background-color: #D1D1D1;}</style>',unsafe_allow_html=True)
+#st.markdown('<style>body{background-color: #D1D1D1;}</style>',unsafe_allow_html=True)
 
-header1, header2 = st.beta_columns([1,5])
+header1, header2 = st.columns([1,5])
 image1 = Image.open('BOS_Cofra_Logo_RGB.png')
 header1.image(image1, width=100)
 
@@ -24,7 +24,7 @@ def main():
     #####CDC#####
     if technique == 'CDC':
         header2.title("""CDC data import""")
-        col1, col2 = st.beta_columns(2)
+        col1, col2 = st.columns(2)
         radio1 = col1.radio('Remove points with less than 3 blows?', ['yes','no'])
         radio2 = col2.radio('Save as?', ['Excel file','CSV file'])        
         
@@ -50,7 +50,7 @@ def main():
             new_name=new_name.split('_')
             new_name=new_name[0]
             
-            col1, col2 = st.beta_columns([2,4])
+            col1, col2 = st.columns([2,4])
             start_button = col1.button('Process .log files', key='1')
             
             if start_button:
@@ -73,7 +73,7 @@ def main():
     #####CRC#####
     elif technique == 'CRC':
         header2.title("""CRC data import""")
-        col1, col2 = st.beta_columns(2)
+        col1, col2 = st.columns(2)
         radio1 = col1.radio('Save as?', ['Excel file','CSV file'])
         
         uploads_ext = st.sidebar.file_uploader('Upload pos files', 
@@ -113,7 +113,11 @@ def main():
             elif len(uploads_acc) < len(uploads_pos):
                 num_missing = len(uploads_pos) - len(uploads_acc)
                 st.warning(f'**WARNING: You are missing {num_missing} acc files, number of pos and acc files should be equal**')
-                
+            
+            select_headers = st.multiselect('Add/remove columns', 
+                                             ['Date', 'Time','Acceleration','Direction [deg]', 'X','Y', 'Pass', 'Speed [km/h]'], 
+                                             ['Date', 'Time','Acceleration','Direction [deg]', 'X','Y', 'Pass', 'Speed [km/h]'])    
+            
             log_ = []
             pos_ = []
             acc_ = []
@@ -144,10 +148,10 @@ def main():
             start_button = st.button('Process files', key='1')
             if start_button:
                 with st.spinner(text='In progress...'):
-                    output = CRC_funcs.convert(pos_, acc_, log_, log_present, acc_present)[0]
-                    pos = CRC_funcs.convert(pos_, acc_, log_, log_present, acc_present)[1]
-                    acc = CRC_funcs.convert(pos_, acc_, log_, log_present, acc_present)[2]
-                    log = CRC_funcs.convert(pos_, acc_, log_, log_present, acc_present)[3]
+                    output = CRC_funcs.convert(pos_, acc_, log_, log_present, acc_present, select_headers)[0]
+                    pos = CRC_funcs.convert(pos_, acc_, log_, log_present, acc_present, select_headers)[1]
+                    acc = CRC_funcs.convert(pos_, acc_, log_, log_present, acc_present, select_headers)[2]
+                    log = CRC_funcs.convert(pos_, acc_, log_, log_present, acc_present, select_headers)[3]
                     
                     if radio1 == 'CSV file':
                         download_link_proc = CDC_funcs.download_link_csv(output, 
@@ -191,7 +195,7 @@ def main():
     #####PVD#####
     elif technique == 'PVD':
         header2.title("""PVD data import""")
-        col1, col2 = st.beta_columns(2)
+        col1, col2 = st.columns(2)
         radio1 = col1.radio('Save as?', ['Excel file','CSV file'])
         
         uploads = st.sidebar.file_uploader('Upload log files', 
@@ -203,19 +207,41 @@ def main():
             st.write(f' **{len(uploads)}** files imported')
             
         if len(uploads) > 0:
+            select1 = st.sidebar.multiselect('test', ['ja', 'nee','weetnie','depth', 'taota','pullbahc', 'force', 'vertical'], ['ja', 'nee','weetnie','depth', 'taota','pullbahc', 'force', 'vertical'])
             list_ = []
+             
             for file_ in uploads:
-                headers = [0,1]
-                df = pd.read_csv(file_, skiprows=headers, index_col=False, header=None)
+                for headerline in file_:
+                    headerline = str(headerline)
+                    if '#date' in headerline:
+                        break
+                headerline = headerline[:-3]
+                headerlist = headerline.replace("b'#", "").split(',')  
+                
+                
+                if ' [ok' in headerlist:
+                    headerlist.remove(' [ok')
+                    headerlist.remove('new roll')
+                    for index, item in enumerate(headerlist):
+                        if 'canceled]' in item:
+                            item = ' '
+                            headerlist[index] = item
+                
+                headers = [0, 1]
+                df = pd.read_csv(file_, index_col=False, header=None)
                 #####
                 list_.append(df)
-
-            col1, col2 = st.beta_columns([2,4])
+            
+            #header_list = pd.read_csv(uploads[0], skiprows=[0], nrows=3, index_col=False, header=2, names=list(range(250)))
+            
+            #st.write(header_list)   
+            
+            col1, col2 = st.columns([2,4])
             start_button = col1.button('Process .ext files', key='1')
 
             if start_button:
                 with st.spinner(text='In progress...'):
-                    frame = PVD_funcs.convert(list_)    
+                    frame = PVD_funcs.convert(list_, headerlist)    
 
                 if radio1 == 'CSV file':
                     tmp_download_link = CDC_funcs.download_link_csv(frame, 
@@ -226,6 +252,24 @@ def main():
                                                                       'PVD_data_processed.xlsx', 
                                                                       'Click here to download excel file!')
                 st.markdown(tmp_download_link, unsafe_allow_html=True)                  
+                
+                ## Download button ##
+                @st.cache
+                def convert_df(df):
+                    # Cache the conversion to prevent computation on every rerun
+                    
+                    return df.to_csv().encode('utf-8')
+                
+                csv = convert_df(frame)
+                st.download_button(
+                    label="Press to Download",
+                    data=csv,
+                    file_name='PVD_data_processed.csv',
+                    mime='text/csv',
+                    )
+                
+                
+                
                 st.success('Done!')
                 PVD_funcs.show_preview(frame)                    
             
