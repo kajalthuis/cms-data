@@ -239,9 +239,9 @@ def main():
                 fixed_nr = st.sidebar.number_input('Cutoff force between working platform and soft soil',
                                                    value = 50,
                                                    step = 1)
-            else:
-                wp_select = 'No'
-                fixed_nr = 'No'
+        elif radio2 == 'No':
+            wp_select = 'No'
+            fixed_nr = 'No'
                                 
         if len(uploads) == 1:
             st.write(f' **{len(uploads)}** file imported')
@@ -319,7 +319,8 @@ def main():
                 st.markdown(text)
                 
                 PVD_funcs.show_preview(frame)
-                PVD_funcs.show_wp(wp_frame)
+                if radio2 == 'Yes':
+                    PVD_funcs.show_wp(wp_frame)
                 #PVD_funcs.show_preview_altair(frame) 
                 #PVD_funcs.show_preview_bokeh(frame)
                 
