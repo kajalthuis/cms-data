@@ -24,14 +24,14 @@ def main():
     #####CDC#####
     if technique == 'CDC':
         header2.title("""CDC data import""")
-        col1, col2 = st.columns(2)
-        radio1 = col1.radio('Remove points with less than 3 blows?', ['yes','no'])
-        radio2 = col2.radio('Save as?', ['Excel file','CSV file'])        
-        
+
         uploads = st.sidebar.file_uploader('Upload log files', 
                                            accept_multiple_files=True, 
                                            type='log')
+        radio1 = st.sidebar.radio('Remove points with less than 3 blows?', ['yes','no'])
+        radio2 = st.sidebar.radio('Save as?', ['Excel file','CSV file'])        
         
+
         if len(uploads) == 1:
             st.write(f' **{len(uploads)}** file imported')
         else:
@@ -53,35 +53,49 @@ def main():
             col1, col2 = st.columns([2,4])
             start_button = col1.button('Process .log files', key='1')
             
+            text = '''
+                        
+                ---
+                
+                '''
+            st.markdown(text)
+            
             if start_button:
                 with st.spinner(text='In progress...'):
                     frame = CDC_funcs.convert(list_, radio1, radio2, new_name)    
                 
-                if radio2 == 'CSV file':
-                    tmp_download_link = CDC_funcs.download_link_csv(frame, 
-                                                                    f'{new_name}.csv', 
-                                                                    'Click here to download CSV file!')
-                elif radio2 == 'Excel file':
-                    tmp_download_link = CDC_funcs.download_link_excel(frame, 
-                                                                      f'{new_name}.xlsx', 
-                                                                      'Click here to download excel file!')
-                st.markdown(tmp_download_link, unsafe_allow_html=True)                    
+                    if radio2 == 'CSV file':
+                        tmp_download_link = CDC_funcs.download_link_csv(frame, 
+                                                                        f'{new_name}.csv', 
+                                                                        'Click here to download CSV file!')
+                    elif radio2 == 'Excel file':
+                        tmp_download_link = CDC_funcs.download_link_excel(frame, 
+                                                                          f'{new_name}.xlsx', 
+                                                                          'Click here to download excel file!')
+                    st.markdown(tmp_download_link, unsafe_allow_html=True)                    
+                    
+                text = '''
+                        
+                ---
                 
-                st.success('Done!')
+                '''
+                st.markdown(text)
+                
                 CDC_funcs.show_preview(frame)
-    
+                st.success('Done!')
+                
     #####CRC#####
     elif technique == 'CRC':
         header2.title("""CRC data import""")
-        col1, col2 = st.columns(2)
-        radio1 = col1.radio('Save as?', ['Excel file','CSV file'])
         
         uploads_ext = st.sidebar.file_uploader('Upload pos files', 
                                                accept_multiple_files=True, 
                                                type='ext')
         uploads_log = st.sidebar.file_uploader('Upload log files', 
                                                accept_multiple_files=True, 
-                                               type='log')
+                                               type='log')        
+        radio1 = st.sidebar.radio('Save as?', ['Excel file','CSV file'])
+        
         uploads_pos = []
         uploads_acc = []
 
@@ -146,12 +160,17 @@ def main():
                     acc_.append(df)
             
             start_button = st.button('Process files', key='1')
+            
+            text = '''
+                    
+            ---
+            
+            '''
+            st.markdown(text)            
+            
             if start_button:
                 with st.spinner(text='In progress...'):
-                    output = CRC_funcs.convert(pos_, acc_, log_, log_present, acc_present, select_headers)[0]
-                    pos = CRC_funcs.convert(pos_, acc_, log_, log_present, acc_present, select_headers)[1]
-                    acc = CRC_funcs.convert(pos_, acc_, log_, log_present, acc_present, select_headers)[2]
-                    log = CRC_funcs.convert(pos_, acc_, log_, log_present, acc_present, select_headers)[3]
+                    output, pos, acc, log = CRC_funcs.convert(pos_, acc_, log_, log_present, acc_present, select_headers)
                     
                     if radio1 == 'CSV file':
                         download_link_proc = CDC_funcs.download_link_csv(output, 
@@ -189,18 +208,41 @@ def main():
                     if log_present:
                         st.markdown(download_link_log, unsafe_allow_html=True)
                      
-                st.success('Done!')
+                text = '''
+                        
+                ---
+                
+                '''
+                st.markdown(text)
+                
                 CRC_funcs.show_preview(output)
+                st.success('Done!')
     
     #####PVD#####
     elif technique == 'PVD':
         header2.title("""PVD data import""")
-        col1, col2 = st.columns(2)
-        radio1 = col1.radio('Save as?', ['Excel file','CSV file'])
-        
+        #col1, col2 = st.columns(2)
         uploads = st.sidebar.file_uploader('Upload log files', 
                                            accept_multiple_files=True, 
-                                           type='ext')        
+                                           type='ext')                
+        radio1 = st.sidebar.radio('Save as?', ['Excel file','CSV file'])
+        radio2 = st.sidebar.radio('Show platform thickness map?', ['No', 'Yes'])
+        
+        if radio2 == 'Yes':
+            wp_select = st.sidebar.selectbox('Choose method to calculate cable tension', 
+                                         ('Lowest force plus fixed number','Manual choice'))
+            if wp_select == 'Lowest force plus fixed number':
+                fixed_nr = st.sidebar.number_input('Fixed number',
+                                                 value = 5,
+                                                 step = 1)
+            elif wp_select == 'Manual choice':
+                fixed_nr = st.sidebar.number_input('Cutoff force between working platform and soft soil',
+                                                   value = 50,
+                                                   step = 1)
+            else:
+                wp_select = 'No'
+                fixed_nr = 'No'
+                                
         if len(uploads) == 1:
             st.write(f' **{len(uploads)}** file imported')
         else:
@@ -231,47 +273,58 @@ def main():
                 #####
                 list_.append(df)
             
-            #header_list = pd.read_csv(uploads[0], skiprows=[0], nrows=3, index_col=False, header=2, names=list(range(250)))
-            
-            #st.write(header_list)   
-            
             col1, col2 = st.columns([2,4])
             start_button = col1.button('Process .ext files', key='1')
-
+            
+            text = '''
+                        
+            ---
+            
+            '''
+            st.markdown(text)
+            
             if start_button:
                 with st.spinner(text='In progress...'):
-                    frame = PVD_funcs.convert(list_, headerlist)    
+                    frame, wp_frame = PVD_funcs.convert(list_, headerlist, wp_select, fixed_nr)
 
-                if radio1 == 'CSV file':
-                    tmp_download_link = CDC_funcs.download_link_csv(frame, 
-                                                                    'PVD_data_processed.csv', 
-                                                                    'Click here to download CSV file!')
-                elif radio1 == 'Excel file':
-                    tmp_download_link = CDC_funcs.download_link_excel(frame, 
-                                                                      'PVD_data_processed.xlsx', 
-                                                                      'Click here to download excel file!')
-                st.markdown(tmp_download_link, unsafe_allow_html=True)                  
+                    if radio1 == 'CSV file':
+                        tmp_download_link = CDC_funcs.download_link_csv(frame, 
+                                                                        'PVD_data_processed.csv', 
+                                                                        'Click here to download CSV file!')
+                    elif radio1 == 'Excel file':
+                        tmp_download_link = CDC_funcs.download_link_excel(frame, 
+                                                                          'PVD_data_processed.xlsx', 
+                                                                          'Click here to download excel file!')
+                    st.markdown(tmp_download_link, unsafe_allow_html=True)                  
                 
-                ## Download button ##
-                @st.cache
-                def convert_df(df):
-                    # Cache the conversion to prevent computation on every rerun
+                # ## Download button ##
+                # @st.cache
+                # def convert_df(df):
+                #     # Cache the conversion to prevent computation on every rerun
                     
-                    return df.to_csv().encode('utf-8')
+                #     return df.to_csv().encode('utf-8')
                 
-                csv = convert_df(frame)
-                st.download_button(
-                    label="Press to Download",
-                    data=csv,
-                    file_name='PVD_data_processed.csv',
-                    mime='text/csv',
-                    )
+                # csv = convert_df(frame)
+                # st.download_button(
+                #     label="Press to Download",
+                #     data=csv,
+                #     file_name='PVD_data_processed.csv',
+                #     mime='text/csv',
+                #     )       
+                text = '''
+                        
+                ---
                 
+                '''
+                st.markdown(text)
                 
+                PVD_funcs.show_preview(frame)
+                PVD_funcs.show_wp(wp_frame)
+                #PVD_funcs.show_preview_altair(frame) 
+                #PVD_funcs.show_preview_bokeh(frame)
                 
                 st.success('Done!')
-                PVD_funcs.show_preview(frame)                    
-            
+                
 if __name__ == "__main__":
     main()
     

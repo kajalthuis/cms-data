@@ -16,7 +16,7 @@ def convert(pos_, acc_, log_, log_present, acc_present, select_headers):
     
     if log_present:
         log = pd.concat(log_)
-    
+        
         temp = [0]*len(log)
         for i in range(1, len(log)-1):
             dt = log['time [HHMMSS.SSS]'].iloc[i+1] - log['time [HHMMSS.SSS]'].iloc[i-1]
@@ -159,7 +159,11 @@ def convert(pos_, acc_, log_, log_present, acc_present, select_headers):
         acc = acc.sort_values(by=['#date [YYYYMMDD]', 'time [HHMMSS]'])
     else:
         acc = pd.DataFrame()
-        
+    
+    col1, col2 = st.columns(2)
+    col1.metric('Number of impacts [-]', len(output))
+    #col2.metric('Linear meter [m]', round(frame['Max. depth [m]'].sum(),2))    
+    
     ## file name ##
     #date = output['Date'].iloc[0]
     #name_proc = 'CRC data_processed_' + str(date)
