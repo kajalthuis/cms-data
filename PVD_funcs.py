@@ -8,8 +8,7 @@ Created on Tue May 11 17:52:23 2021
 import pandas as pd
 import streamlit as st
 import plotly.express as px
-import altair as alt
-from bokeh.plotting import figure
+
 
 def convert(list_, headerlist, wp_calc_method, fixed_nr):
     
@@ -93,34 +92,6 @@ def show_wp(wp_frame):
     st.write(fig)   
     
     
-def show_preview_altair(frame):
-    st.write('**Preview:**')
-    plotframe = frame[['X [m]', 'Y [m]', 'Max. depth [m]']].copy()    
-    plotframe = plotframe.rename(columns={'X [m]': 'X',
-                                          'Y [m]': 'Y',
-                                          'Max. depth [m]': 'Max_depth'})
 
-    a = alt.Chart(plotframe).mark_circle().encode(alt.X('X', 
-                                                        scale=alt.Scale(domain=(plotframe['X'].min(), 
-                                                                                     plotframe['X'].max()))), 
-                                                  alt.Y('Y',
-                                                        scale=alt.Scale(domain=(plotframe['Y'].min(), 
-                                                                                     plotframe['Y'].max()))),
-                                                  color=alt.Color('Max_depth', scale=alt.Scale(scheme='turbo'))).interactive()
-    
-    st.altair_chart(a, use_container_width=True)
 
-def show_preview_bokeh(frame):
-    st.write('**Preview:**')
-    plotframe = frame[['X [m]', 'Y [m]', 'Max. depth [m]']].copy()    
-    plotframe = plotframe.rename(columns={'X [m]': 'X',
-                                          'Y [m]': 'Y',
-                                          'Max. depth [m]': 'Max_depth'})    
-    p = figure(title='simple line example', 
-               x_axis_label='X',
-               y_axis_label='Y',
-              
-               match_aspect=True)
-    p.circle(source=plotframe, x='X', y='Y')
-    st.bokeh_chart(p, use_container_width=True)
     
