@@ -23,6 +23,10 @@ def convert(list_, headerlist, wp_calc_method, fixed_nr):
     
         ## Add date and time columns ##
     frame['date [YYYYMMDD]'] = pd.to_datetime(frame['date [YYYYMMDD]'], format='%Y%m%d').dt.date
+    frame['time [HHMMSS]'] = frame['time [HHMMSS]'].astype(int)
+    for pvd in frame.index:
+        if len(str(frame.loc[pvd, 'time [HHMMSS]'])) < 6:
+            frame.loc[pvd, 'time [HHMMSS]'] = (6 - len(str(frame.loc[pvd, 'time [HHMMSS]']))) * '0' + str(frame.loc[pvd, 'time [HHMMSS]'])
     frame['time [HHMMSS]'] = pd.to_datetime(frame['time [HHMMSS]'], format='%H%M%S').dt.time
        
         ## Cable tension + wp thickness ##
