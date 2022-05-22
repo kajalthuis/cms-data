@@ -45,6 +45,13 @@ def convert(list_, radio1, radio2, new_name):
     
         ## Add date and time columns ##
     frame['Date'] = pd.to_datetime(frame['Date'], format='%Y%m%d').dt.date
+    
+    frame['Time'] = frame['Time'].astype(str)
+    frame['Time'] = frame['Time'].str.split('.', expand=True)[0]
+    frame['Time'] = frame['Time'].astype(int)
+    for point in frame.index:
+        if len(str(frame.loc[point, 'Time'])) < 6:
+            frame.loc[point, 'Time'] = (6 - len(str(frame.loc[point, 'Time']))) * '0' + str(frame.loc[point, 'Time'])    
     frame['Time'] = pd.to_datetime(frame['Time'], format='%H%M%S').dt.time
     
         ## Split Level/Pattern column ##
