@@ -10,7 +10,7 @@ import streamlit as st
 import plotly.express as px
 import io
 import base64
-#import numpy as np
+import numpy as np
 
 
 def convert(list_, radio1, radio2, new_name):
