@@ -146,7 +146,10 @@ def convert(list_, radio1, radio2, new_name):
             frame.iloc[i, Total_induced_index] = frame.iloc[i, ind_index-1]
     
         ## Add column with cumulative count of points ##
-        
+    frame = frame.sort_values(by=['Date', 'Time'])
+    frame.loc[:, 'Point nr.'] = np.arange(1,len(frame)+1)
+    frame = frame.set_index('Point nr.')
+    
     Cranes = list(set(frame.Vessel_name))
     for i in  Cranes:
         crane = list(frame.Vessel_name)
